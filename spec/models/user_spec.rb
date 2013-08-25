@@ -39,8 +39,18 @@ describe User do
 		end
 
 		it { should be_admin }
+		
 	end
 
+
+	describe "with accessible attributes" do
+		it "should not contain admin" do
+			expect { 
+				@user = User.new(name: "Example User", email: "user@example.com", 
+						password: "foobar", password_confirmation: "foobar", 
+						admin: true) }.to raise_error(ActiveModel::MassAssignmentSecurity::Error)
+		end
+	end
 
 	describe "when name is not present" do 
 		before { @user.name = " "}

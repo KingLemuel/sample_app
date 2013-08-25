@@ -2,6 +2,7 @@ class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_filter :correct_user, only: [:edit, :update]
   before_filter :admin_user,  only: :destroy
+  before_filter :back_to_root, only: [:new, :create]
 
   def index
     @users = User.paginate(page: params[:page])
@@ -21,12 +22,12 @@ class UsersController < ApplicationController
       sign_in @user
   		flash[:success] = "Welcome to the Sample App!"
   	  redirect_to @user
-  	else
+    else
   		render 'new'
   	end
   end
 
-  def edit 
+  def edit
   end
 
   def update
@@ -40,9 +41,14 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
-    redirect_to users_url
+    @user = User.find(params[:id])
+    if @user != current_user
+      @user.destroy
+      flash[:success] = "User destroyed."
+      redirect_to users_url
+    else
+      redirect_to users_path(current_user)
+    end
   end
   
   private
@@ -62,4 +68,12 @@ class UsersController < ApplicationController
     def admin_user
       redirect_to(root_url) unless current_user.admin?
     end
+
+    def back_to_root
+      if signed_in?
+        redirect_to root_url
+      end
+    end
+
+
 end
